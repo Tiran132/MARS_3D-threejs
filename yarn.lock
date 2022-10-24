@@ -7383,6 +7383,11 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
+net@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/net/-/net-1.0.2.tgz#d1757ec9a7fb2371d83cf4755ce3e27e10829388"
+  integrity sha512-kbhcj2SVVR4caaVnGLJKmlk2+f+oLkjqdKeQlmUtz6nGzOpbcobwVIeSURNgraV/v3tlmGIX82OcPCl0K6RbHQ==
+
 no-case@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-3.0.4.tgz#d361fd5c9800f558551a8369fc0dcd4662b6124d"
@@ -8727,6 +8732,11 @@ react-use-measure@^2.1.1:
   integrity sha512-nocZhN26cproIiIduswYpV5y5lQpSQS1y/4KuvUCjSKmw7ZWIS/+g3aFnX3WdBkyuGUtTLif3UTqnLLhbDoQig==
   dependencies:
     debounce "^1.2.1"
+
+react-use-websocket@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-use-websocket/-/react-use-websocket-4.2.0.tgz#658c4e44ee5e0fc3d29a66c2a753a72754a5db87"
+  integrity sha512-ZovaTlc/tWX6a590fi3kMWImhyoWj46BWJWvO5oucZJzRnVVhYtes2D9g+5MKXjSdR7Es3456hB89v4/1pcBKg==
 
 react@^18.2.0:
   version "18.2.0"
