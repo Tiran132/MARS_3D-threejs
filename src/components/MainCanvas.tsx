@@ -1,28 +1,33 @@
 import { Box, OrbitControls, Plane } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { Mesh, Vector3 } from "three";
+import * as THREE from "three";
+import {
+  CommandType,
+  CommandVector3,
+  CustomElementTypes,
+} from "../types/types";
 // import WebSocket from "ws";
 
 interface AnimatedBoxProps {
-  position: Vector3;
+  position: THREE.Vector3;
 }
 
 function AnimatedBox({ position }: AnimatedBoxProps) {
-  const ref = useRef<Mesh>(null);
-    const [frame, setFrame] = useState(0);
+  const ref = useRef<THREE.Mesh>(null);
+  const [frame, setFrame] = useState(0);
 
-    useFrame(() => {
-      if (!ref.current) return;
+  useFrame(() => {
+    if (!ref.current) return;
 
     //   ref.current.position.set(position.x, position.y, position.z);
     //   ref.current.position.x = -Math.sin(frame) * 2;
     //   ref.current.position.y = Math.sin(frame) * 2;
-      
-      ref.current.position.lerp(position, 0.1)
 
-      setFrame(frame+1/100)
-    });
+    ref.current.position.lerp(position, 0.1);
+
+    setFrame(frame + 1 / 100);
+  });
 
   return (
     <mesh position={position} ref={ref} onClick={() => console.log(position)}>
@@ -32,76 +37,219 @@ function AnimatedBox({ position }: AnimatedBoxProps) {
   );
 }
 
-const BoxPos = new Vector3(0, 0, 0);
-const BoxPos1 = new Vector3(0, 1, 0);
-const BoxPos2 = new Vector3(2, 1, 3);
+const zeroVector3 = new THREE.Vector3(0, 0, 0);
+const onesVector3 = new THREE.Vector3(1, 1, 1);
+const defaultRotation = new THREE.Euler(0, 0, 0);
+const defaultColor = new THREE.Color(50, 168, 82);
+
+const str: "cube" | "sphere" = "cube";
+const defaultGeometry: [x: number, y: number, z: number] = [1, 1, 1]
+
+const defaultParams = {
+  object_type: str,
+  position: zeroVector3,
+  rotation: defaultRotation,
+  geometry: defaultGeometry, // Размеры в 3 плоскостях
+  scale: onesVector3,
+  color: defaultColor,
+};
+
+interface CustomElementType {
+    data: CustomElementTypes
+}
+
+function CustomElement({ data: props }: CustomElementType) {
+  const ref = useRef<THREE.Mesh>(null);
+
+  const [object_type, setObject_type] = useState<"cube" | "sphere">("cube");
+  const [position, setPosition] = useState(zeroVector3);
+  const [rotation, setRotation] = useState(defaultRotation);
+  const [geometry, setGeomety] = useState<[x: number, y: number, z: number]>([
+    1, 1, 1,
+  ]);
+  const [scale, setScale] = useState(onesVector3);
+  const [color, setColor] = useState(defaultColor);
+
+  //   const [currentParams, setCurrentParams] = useState<typeof defaultParams>(defaultParams)
+
+  const [isCurrent, setIsCurrent] = useState(false);
+
+  useEffect(() => {
+    setIsCurrent(false);
+    setObject_type(props.object_type || object_type);
+    setPosition(props.position || position);
+    setRotation(props.rotation || rotation);
+    setGeomety(props.geometry || geometry);
+    setScale(props.scale || scale);
+    setColor(props.color || color);
+  }, [props]);
+
+  useFrame(() => {
+    if (isCurrent) return;
+    if (!ref.current) return;
+
+    ref.current.position.set(position.x, position.y, position.z);
+    ref.current.rotation.set(rotation.x, rotation.y, rotation.z);
+    ref.current.scale.set(scale.x, scale.y, scale.z);
+
+    setIsCurrent(true);
+  });
+
+  return (
+    <mesh
+      position={position}
+      ref={ref}
+      rotation={rotation}
+      scale={scale}
+      onClick={() => console.log(position)}
+    >
+      {props.object_type == "cube" ? (
+        <boxGeometry args={geometry} />
+      ) : (
+        <sphereGeometry args={geometry} />
+      )}
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
+}
+
+const ElementIndexed = (props: CustomElementTypes, id: number) => {
+    const createdElement = <CustomElement data={props} />
+
+    return [createdElement, id]
+}
+
+const BoxPos = new THREE.Vector3(0, 0, 0);
+const BoxPos1 = new THREE.Vector3(0, 1, 0);
+const BoxPos2 = new THREE.Vector3(2, 1, 3);
 
 const MainCanvas = () => {
-  const [boxPos1, setBoxPos1] = useState<Vector3>(BoxPos1);
-  const [boxPos2, setBoxPos2] = useState<Vector3>(BoxPos2);
-  useEffect(() => {
-      const ws = new WebSocket("ws://localhost:5000/");
-      ws.onopen = () => {
-          console.log("bobus");
-          // ws.send("yey")
-        };
+  const [boxPos1, setBoxPos1] = useState<THREE.Vector3>(BoxPos1);
+  const [boxPos2, setBoxPos2] = useState<THREE.Vector3>(BoxPos2);
 
-    // const wss = new WebSocket.Server({port: 5000}, () => {
-    //      console.log("server started")
-    // })
-    // ws.onopen = () => {
-    //     ws.send("bobus")
-    // }
+  const [createdObjects, setCreatedObjects] = useState<any[]>([]);
+  const [objectsData, setObjectsData] = useState<(typeof defaultParams)[]>([]);
+
+
+useEffect(() => {
+    const ws = new WebSocket("ws://localhost:5000/");
+    ws.onopen = () => {
+      console.log("Opened session");
+      // ws.send("yey")
+    };
 
     const setPos = (id: string, data: [number, number, number]) => {
-        let newPos = id == "2" ? boxPos2 : boxPos1;
-        
-        newPos.x += data[0];
-        newPos.y += data[1];
-        newPos.z += data[2];
+      let newPos = id == "2" ? boxPos2 : boxPos1;
 
-        id == "2" ? setBoxPos2(newPos) : setBoxPos1(newPos);
+      newPos.x += data[0];
+      newPos.y += data[1];
+      newPos.z += data[2];
+
+      id == "2" ? setBoxPos2(newPos) : setBoxPos1(newPos);
     };
 
     ws.onmessage = (ev) => {
-      const [id, command] = `${ev.data}`.split("&")
+      //   const [id, command] = `${ev.data}`.split("&");
+      try {
+        const command: CommandType = JSON.parse(ev.data);
 
+        if (createdObjects.length < 0) {
+            createdObjects.push(defaultParams)
+        }
 
-      switch (command) {
-        case "right":
-          setPos(id, [1, 0, 0]);
-          break;
+        if (objectsData.length > 0){
+            const c = command.args;
+            // if ("object_type" in c) objectsData[0].object_type = c.object_type;
+            if ("position" in c) objectsData[0].position = new THREE.Vector3(c.position![0], c.position![1], c.position![2])
+            if ("rotation" in c) objectsData[0].rotation = new THREE.Euler(c.rotation![0], c.rotation![1], c.rotation![2])
+            if ("geometry" in c) objectsData[0].geometry = [c.scale![0], c.scale![1], c.scale![2]]
+            if ("scale" in c) objectsData[0].scale = new THREE.Vector3(c.scale![0], c.scale![1], c.scale![2])
+            if ("color" in c) objectsData[0].color = new THREE.Color(c.color![0], c.color![1], c.color![2])
+            
+        } 
 
-        case "left":
-          setPos(id, [-1, 0, 0]);
-          break;
+        // switch (command.type) {
+        //     case "create":
+        //     //   setPos( [1, 0, 0]);
+        //       break;
 
-        case "up":
-          setPos(id, [0, 1, 0]);
-          break;
+        //   }
+        // switch (command.type) {
+        //   case "create":
+        //     break;
 
-        case "down":
-          setPos(id, [0, -1, 0]);
-          break;
-      }
+        //   case "update":
+        //     break;
+
+        //   default:
+        //     break;
+        // }
+      } catch {}
     };
-  }, []);
+  }, []); 
 
+
+ const addShape = () => {
+    const [newElement, id] = ElementIndexed(defaultParams, 1)
+    console.log(newElement)
+    setCreatedObjects([
+        ...createdObjects,
+        newElement
+        // <CustomElement data={defaultParams} />
+    ])
+ }
+
+ const addCommand = () => {
+    // console.log(v)
+    const command: typeof defaultParams = JSON.parse(v)
+
+    console.log(command)
+ }
+
+ const [v, setV] = useState(
+    `{
+        object_type: "cube",
+        position: [0,0,0],
+        rotation: [0,0,0],
+      }`
+ )
+
+ 
+ const handleChange = (event: any) => {
+    setV(event.target.value);
+  };
 
   return (
-    <Canvas
-      style={{ height: "100vh", width: "100vw" }}
-      camera={{ position: [0, 2, 5], zoom: 1 }}
-    >
-      <OrbitControls />
-      <ambientLight intensity={0.5} />
-      <directionalLight intensity={0.5} position={[6, 3, 1]} />
-      <AnimatedBox position={boxPos1} />
-      <AnimatedBox position={boxPos2} />
-      <Box onClick={() => {console.log("abobus")}} position={BoxPos} args={[10, 0.000001, 10]}>
-        <meshStandardMaterial color={"darkblue"} />
-      </Box>
-    </Canvas>
+    <>
+
+    <button onClick={() => addShape()}>Добавить объект</button>
+    <button onClick={() => addCommand()}>Команда</button>
+
+    <textarea onChange={(e) => handleChange(e)}  style={{height: "100px", width: "50%"}} value={v} />
+    
+      <Canvas
+        style={{ height: "100vh", width: "100vw" }}
+        camera={{ position: [0, 2, 5], zoom: 1 }}
+      >
+        <OrbitControls />
+        <ambientLight intensity={0.5} />
+        <directionalLight intensity={0.5} position={[6, 3, 1]} />
+        {/* <AnimatedBox position={boxPos1} />
+        <AnimatedBox position={boxPos2} /> */}
+
+        {[...createdObjects]}
+
+        <Box
+          onClick={() => {
+            console.log("abobus");
+          }}
+          position={BoxPos}
+          args={[10, 0.000001, 10]}
+        >
+          <meshStandardMaterial color={"darkblue"} />
+        </Box>
+      </Canvas>
+    </>
   );
 };
 
