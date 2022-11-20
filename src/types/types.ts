@@ -7,6 +7,7 @@
 import { Color, Euler, Vector3 } from "three";
 
 export type CommandVector3 = [x: number, y: number, z: number]
+export type CommandColor = [x: number, y: number, z: number]
 
 
 export interface CommandType {
@@ -27,13 +28,15 @@ export interface CommandTypeArgs {
 }
 
 export interface CustomElementTypes {
-    object_type: "cube" | "sphere"
+    object_type: ObjectType
     position?: Vector3
     rotation?: Euler
     geometry?: CommandVector3 // Размеры в 3 плоскостях
     scale?:	   Vector3
     color?:    Color
 }
+
+export type ObjectType = "cube" | "sphere" | "cone" | "cylinder" | "torus" | "custom" | "group"
 
 export interface ObjectWithId {
     id: number

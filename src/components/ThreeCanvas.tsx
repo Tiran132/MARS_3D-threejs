@@ -1,74 +1,37 @@
-import { useEffect, useRef, useState } from "react";
-import * as three from "three";
-
-
-class Cube extends three.Mesh {
-    constructor() {
-      super();
-  
-      const geometry = new three.BoxGeometry();
-      const material = new three.MeshStandardMaterial();
-      material.color.set("blue");
-  
-      this.geometry = geometry;
-      this.material = material;
-    }
-  
-    update() {
-      this.rotation.x += 0.01;
-      this.rotation.y += 0.01;
-    }
-  
-    dispose() {
-      this.geometry.dispose();
-    }
-  }
+import { OrbitControls, Stats } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
+import { useEffect, useState } from "react";
+import { MainScene } from "../threejs/ObjectManager";
 
 const ThreeCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [renderer, setRenderer] = useState<three.WebGLRenderer | null>(null);
-
-  useEffect(() => {
-    if (canvasRef.current && !renderer) {
-      const scene = new three.Scene();
-
-      const camera = new three.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-      );
-      
-      camera.position.z = 5;
-
-      const renderer = new three.WebGLRenderer({
-        canvas: canvasRef.current,
-        antialias: true,
-        // alpha: true,
-      });
-      renderer.setClearColor( 0x000000, 1 );
-      renderer.setSize(window.innerWidth, window.innerHeight - 5);
-      document.body.appendChild(renderer.domElement);
-      setRenderer(renderer)
-      console.log(renderer)
-      
-        const ambientLight = new three.AmbientLight(0xffaaff);
-        scene.add(ambientLight);
-
-        const pointLight = new three.PointLight(0xffaaff);
-
-        pointLight.position.set(10, 10, 10);
-        scene.add(pointLight);
-
-        const cube = new Cube();
-        cube.position.set(0, 0, 0)
-        scene.add(cube);
-
-      // //   scene.add(OrbitControls);
-    }
-  }, []);
-
-  return <canvas ref={canvasRef}></canvas>;
+  const [scene] = useState(() => MainScene);
+  
+  return (
+    <Canvas
+      style={{ width: `100%`, height: `100vh` }}
+      shadows
+      camera={{ position: [10, 0, 80], fov: 45 }}
+    >
+      <primitive object={scene} />
+      <OrbitControls />
+      <ambientLight intensity={0.5} />
+      <directionalLight intensity={0.5} position={[6, 3, 1]} />
+      <gridHelper args={[15, 15]} position={[0, -0.5, 0]} />
+      <Stats />
+    </Canvas>
+  );
 };
 
 export default ThreeCanvas;
+
+// const ws = new WebSocket("ws://localhost:5000/");
+// ws.onopen = () => {
+//   console.log("Opened session");
+//   // ws.send("yey")
+// };
+
+// ws.onmessage = (ev) => {
+//   try {
+//     const command = JSON.parse(ev.data);
+//   } catch {}
+// };
