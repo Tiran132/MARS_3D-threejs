@@ -1,7 +1,10 @@
-import { CustomObject3D, CustomObjectParams } from "./CustomObject3D";
+import { CustomObject3D, CustomObjectParams, GroupParams, ModelParams } from "./CustomObject3D";
 import * as THREE from "three"
+import { LoadModel, LoadModel_OBJ } from "./ModelLoader";
+import { init, t_RoboHand } from "./tests";
+import { a } from "./ObjectManager1";
 
-class ObjectIndexed {
+export class ObjectIndexed {
     id: number;
     object: CustomObject3D;
 
@@ -23,6 +26,7 @@ let objectsIndexed: ObjectIndexed[] = []
 const MainScene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight);
+const worldVector = new THREE.Vector3()
 
 
 const getObjectById = (id: number) => {
@@ -45,6 +49,60 @@ const create = (params: CustomObjectParams) => {
     return newIndexedObject.getId()
 }
 
+const create_model_OBJ = (model_name: string) => {
+
+    const newObject = new CustomObject3D();
+    newObject.setParams({
+        object_type: "custom"
+    })
+
+    let obj_object: THREE.Group | undefined
+    LoadModel_OBJ(model_name, (new_object) => {
+        obj_object = new_object
+        
+        if (new_object) {
+            new_object.children.map(child => {
+                if(child instanceof THREE.Mesh)
+                    child.material = newObject.getMesh().material
+            })
+            newObject.getMesh().add(obj_object)
+        }
+    });
+
+    MainScene.add(newObject.getMesh())
+    const newIndexedObject = new ObjectIndexed(objectsIndexed.length, newObject)
+    objectsIndexed.push(newIndexedObject)
+
+    return newIndexedObject.getId()
+}
+
+const create_model = (path: string) => {
+    const newObject = new CustomObject3D();
+    newObject.setParams({
+        object_type: "custom"
+    })
+
+    let obj_object: THREE.Object3D | undefined
+    LoadModel(path, (new_object) => {
+        obj_object = new_object
+        
+        if (new_object) {
+            // new_object.children.map(child => {
+            //     if(child instanceof THREE.Mesh)
+            //         child.material = newObject.getMesh().material
+            // })
+            newObject.getMesh().add(obj_object)
+        }
+    })
+
+    MainScene.add(newObject.getMesh())
+
+    const newIndexedObject = new ObjectIndexed(objectsIndexed.length, newObject)
+    objectsIndexed.push(newIndexedObject)
+
+    return newIndexedObject.getId()
+}
+
 
 /**
  * 
@@ -61,83 +119,32 @@ const update = (id: number, params: CustomObjectParams) => {
     return object?.getId()
 }
 
-const createSceneAttributes = () => {
-    MainScene.add()
-}
+const group = (idParent: number, idChild: number) => {
+    const parent = getObjectById(idParent)
+    const child = getObjectById(idChild)
 
-export { MainScene, objectsIndexed, getAllObjects, getObjectById, create, update }
-
-
-
-
-const test = () => {
-
-    create({
-        object_type: "cylinder",
-        position: [1, 2, 0]
-    })
-
-
-    const objectId = create({
-        position: [1, 2, 0]
-    })
-
-    console.log("created object with id:", objectId)
-
-
-    setTimeout(() => {
-        update(objectId, {
-            color: [10, 60, 100],
-            scale: [1.2, 1.2, 1.2],
-            position: [1, 0, 0]
-        })
-    }, 2000);
-
-}
-
-// test();
-
-interface Command {
-    name: "create" | "update"
-    data: { id?: number } & CustomObjectParams
-}
-
-const commandEndpoint = (commandJSON: string) => {
-    const command: Command = JSON.parse(commandJSON)
-    return {
-        name: command.name,
-        id: handleCommand(command)
-    }
-}
-
-const handleCommand = (command: Command) => {
-    switch (command.name) {
-        case "create":
-            return create(command.data);
-        case "update":
-            if (command.data.id != undefined)
-                return update(command.data.id, command.data);
-            throw "Id required, but not provided"
+    if (parent && child){
+        const worldPos = child.getObject().getMesh().position;
+        const localePos = parent.getObject().getMesh().worldToLocal(worldPos);
+        parent.getObject().getMesh().add(child.getObject().getMesh())
+        child.getObject().getMesh().position.set(localePos.x, localePos.y, localePos.z);
     }
 }
 
 
-commandEndpoint(`
-{
-    "name":"create",
-    "data":{
-       "position":[0, 0, 0]
-    }
- }
-`)
+const rgroup = (idParent: number, idChild: number) => {
+    const parent = getObjectById(idParent)
+    const child = getObjectById(idChild)
 
-const result = commandEndpoint(`
-{
-    "name":"update",
-    "data":{
-        "id": 0,
-       "color": [10, 100, 50]
+    if (parent && child){
+        const worldPos = child.getObject().getMesh().getWorldPosition(worldVector);
+        MainScene.add(child.getObject().getMesh())
+        child.getObject().getMesh().position.set(worldPos.x, worldPos.y, worldPos.z);
     }
- }
-`)
-console.log(result)
+}
+create_model("models/model_with_light.json")
+
+export { MainScene, objectsIndexed, getAllObjects, getObjectById, create, update, group, rgroup, create_model }
+
+init()
+a()
