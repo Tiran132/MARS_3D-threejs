@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 // import MainCanvas from './components/MainCanvas';
 import ThreeCanvas from './components/ThreeCanvas';
-import { createWebSocket } from './WebServer';
+import { createWebSocket } from './WebClient';
 import { useState } from 'react';
 
 function App() {

@@ -1,6 +1,6 @@
 import { OrbitControls, Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MainScene } from "../threejs/ObjectManager";
 
 const ThreeCanvas = () => {
@@ -10,7 +10,7 @@ const ThreeCanvas = () => {
     <Canvas
       style={{ width: `100%`, height: `100vh` }}
       shadows
-      camera={{ position: [10, 0, 80], fov: 45 }}
+      camera={{ position: [0, 10, 20], fov: 45 }}
     >
       <primitive object={scene} />
       <OrbitControls />
@@ -23,15 +23,3 @@ const ThreeCanvas = () => {
 };
 
 export default ThreeCanvas;
-
-// const ws = new WebSocket("ws://localhost:5000/");
-// ws.onopen = () => {
-//   console.log("Opened session");
-//   // ws.send("yey")
-// };
-
-// ws.onmessage = (ev) => {
-//   try {
-//     const command = JSON.parse(ev.data);
-//   } catch {}
-// };
