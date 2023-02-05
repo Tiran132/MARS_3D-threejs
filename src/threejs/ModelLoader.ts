@@ -1,7 +1,7 @@
 import { Vector3, Euler, Color, BufferGeometry, MeshStandardMaterial, Mesh, Material } from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { ObjectType, CommandVector3 } from '../types/types';
-import { CustomObject3D, CustomObjectParams } from './CustomObject3D';
+import { CustomObjectParams } from './CustomObject3D';
 import { MainScene } from "./ObjectManager";
 import * as THREE from "three"
 import { sleep } from './tests';

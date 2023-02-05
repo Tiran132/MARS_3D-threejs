@@ -365,7 +365,10 @@ const mini_test = () => {
 }
 
 const t_obj_hand = async () => {
-    const id = create_model("hand.obj");
+    const id = await create_model("hand.obj");
+    
+    if (!id) return;
+    
     update(id, {
         scale: [0.3, 0.3, 0.3],
         rotation: [-90, 0, 0],
@@ -400,14 +403,17 @@ const t_obj_hand = async () => {
 } 
 
 const t_robot_alina = async () => {
-    const base = create_model("base.obj");
-    const base_sharnir = create_model("base_sharnir.obj");
-    const zveno1 = create_model("zveno1.obj");
+    const base = await create_model("base.obj");
+    const base_sharnir = await create_model("base_sharnir.obj");
+    const zveno1 = await create_model("zveno1.obj");
     // update(base, {
     //     scale: [0.3, 0.3, 0.3],
     //     rotation: [-90, 0, 0],
     //     position: [0, 2.5, 0]
     // })
+
+    if (!base || !base_sharnir || !zveno1) return;
+
     update(base, {
         color: [15, 15, 15]
     })
@@ -422,9 +428,12 @@ const t_robot_alina = async () => {
     })
 
 
-    const zveno2 = create_model("zveno2.obj");
-    const cleshnya1 = create_model("cleshnya1.obj");
-    const cleshnya2 = create_model("cleshnya2.obj");
+    const zveno2 = await create_model("zveno2.obj");
+    const cleshnya1 = await create_model("cleshnya1.obj");
+    const cleshnya2 = await create_model("cleshnya2.obj");
+
+    
+    if (!zveno2 || !cleshnya1 || !cleshnya2) return;
 
     update(zveno2, {
         position: [0, 3.25, 0],

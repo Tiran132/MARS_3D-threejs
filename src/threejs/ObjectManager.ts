@@ -1,133 +1,105 @@
-import { CustomObject3D, CustomObjectParams, GroupParams, ModelParams } from "./CustomObject3D";
+import { createObject, CustomObjectParams, GroupParams, ModelParams, setParamsToObject3D } from "./CustomObject3D";
 import * as THREE from "three"
-import { LoadModel, LoadModel_OBJ } from "./ModelLoader";
+import { getAllObjectsWithName, LoadModel, LoadModel_OBJ } from "./ModelLoader";
 import { init, t_RoboHand } from "./tests";
-import { a } from "./ObjectManager1";
-
-export class ObjectIndexed {
-    id: number;
-    object: CustomObject3D;
-
-    constructor(_id: number, object: CustomObject3D) {
-        this.id = _id;
-        this.object = object;
-    }
-
-    public getId() {
-        return this.id;
-    }
-
-    public getObject() {
-        return this.object
-    }
-}
-let objectsIndexed: ObjectIndexed[] = []
+import { Color } from "three";
 
 const MainScene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight);
 const worldVector = new THREE.Vector3()
 
+// new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: new Color(0.5, 0.5, 0.5)})
+// const object = new THREE.Mesh()
+// setParamsToObject3D(object, {
+//     object_type: "sphere",
+
+// })
+// console.log(createObject({
+//     object_type: "cube",
+//     // geometry: [1, 1, 1]
+// }))
+
+
+export const a = () => ""
 
 const getObjectById = (id: number) => {
-    return objectsIndexed.find(object => object.getId() == id)
+    return MainScene.getObjectById(id)
 }
 
-const getAllObjects = () => objectsIndexed.map(object => object.getObject());
+const getObjectByName = (name: string) => {
+    return MainScene.getObjectByName(name)
+}
+
+const getAllObjects = () => MainScene.children
 
 /**
  * 
  * @returns id: number
  */
 const create = (params: CustomObjectParams) => {
-    const newObject = new CustomObject3D();
-    newObject.setParams(params)
-    MainScene.add(newObject.getMesh())
-    const newIndexedObject = new ObjectIndexed(objectsIndexed.length, newObject)
-    objectsIndexed.push(newIndexedObject)
-
-    return newIndexedObject.getId()
+    const object = createObject(params)
+    MainScene.add(object)
+    return object.id
 }
 
 const create_model_OBJ = (model_name: string) => {
-
-    const newObject = new CustomObject3D();
-    newObject.setParams({
-        object_type: "custom"
-    })
-
-    let obj_object: THREE.Group | undefined
+    let id: number | undefined
     LoadModel_OBJ(model_name, (new_object) => {
-        obj_object = new_object
-        
         if (new_object) {
             new_object.children.map(child => {
-                if(child instanceof THREE.Mesh)
-                    child.material = newObject.getMesh().material
+                if (child instanceof THREE.Mesh)
+                    child.material = new THREE.MeshStandardMaterial({ color: new Color(0.5, 0.5, 0.5) })
             })
-            newObject.getMesh().add(obj_object)
+
         }
+
+        MainScene.add(new_object)
+        id = new_object.id
     });
-
-    MainScene.add(newObject.getMesh())
-    const newIndexedObject = new ObjectIndexed(objectsIndexed.length, newObject)
-    objectsIndexed.push(newIndexedObject)
-
-    return newIndexedObject.getId()
+    return id
 }
 
-const create_model = (path: string) => {
-    const newObject = new CustomObject3D();
-    newObject.setParams({
-        object_type: "custom"
+const create_model = async (path: string) => {
+    let id: number | undefined
+    await LoadModel(path, (new_object) => {
+        MainScene.add(new_object)
+        id = new_object.id;
+
+        console.log(getAllObjectsWithName(new_object.children))
+        // const zveno2 = getObjectByName("zveno2_detal")
+        // if( zveno2) update(zveno2.id, {
+        //     color: [100, 50, 12],
+        //     // rotation: [50, 0, 0]
+        // })
     })
-
-    let obj_object: THREE.Object3D | undefined
-    LoadModel(path, (new_object) => {
-        obj_object = new_object
-        
-        if (new_object) {
-            // new_object.children.map(child => {
-            //     if(child instanceof THREE.Mesh)
-            //         child.material = newObject.getMesh().material
-            // })
-            newObject.getMesh().add(obj_object)
-        }
-    })
-
-    MainScene.add(newObject.getMesh())
-
-    const newIndexedObject = new ObjectIndexed(objectsIndexed.length, newObject)
-    objectsIndexed.push(newIndexedObject)
-
-    return newIndexedObject.getId()
+    return id
 }
 
 
 /**
- * 
+ *
  * @returns id: number
  */
 const update = (id: number, params: CustomObjectParams) => {
     const object = getObjectById(id)
 
     if (object) {
-        object.getObject().setParams(params)
+        setParamsToObject3D(object, params)
     }
 
-
-    return object?.getId()
+    return object?.id
 }
 
 const group = (idParent: number, idChild: number) => {
     const parent = getObjectById(idParent)
     const child = getObjectById(idChild)
 
-    if (parent && child){
-        const worldPos = child.getObject().getMesh().position;
-        const localePos = parent.getObject().getMesh().worldToLocal(worldPos);
-        parent.getObject().getMesh().add(child.getObject().getMesh())
-        child.getObject().getMesh().position.set(localePos.x, localePos.y, localePos.z);
+    if (parent && child) {
+        const worldPos = child.position;
+        const localePos = parent.worldToLocal(worldPos);
+        parent.add(child)
+        child.position.set(localePos.x, localePos.y, localePos.z);
     }
 }
 
@@ -136,15 +108,28 @@ const rgroup = (idParent: number, idChild: number) => {
     const parent = getObjectById(idParent)
     const child = getObjectById(idChild)
 
-    if (parent && child){
-        const worldPos = child.getObject().getMesh().getWorldPosition(worldVector);
-        MainScene.add(child.getObject().getMesh())
-        child.getObject().getMesh().position.set(worldPos.x, worldPos.y, worldPos.z);
+    if (parent && child) {
+        const worldPos = child.getWorldPosition(worldVector);
+        MainScene.add(child)
+        child.position.set(worldPos.x, worldPos.y, worldPos.z);
     }
 }
-create_model("models/model_with_light.json")
+const id1 = create_model("models/model_with_light.json")
 
-export { MainScene, objectsIndexed, getAllObjects, getObjectById, create, update, group, rgroup, create_model }
+// const torus = create({
+//     object_type: "torus",
+//     position: [1, 5, 0],
+//     geometry: [1, 0.5, 1]
+// })
 
-init()
-a()
+// const ab = () => {
+//     return id1.then((value) => {
+//         console.log(value)
+//     })
+// }
+// ab()
+
+
+export { MainScene, getAllObjects, getObjectById, create, update, group, rgroup, create_model }
+
+// init()

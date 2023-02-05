@@ -1,7 +1,7 @@
 import { OrbitControls, Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
-import { MainScene } from "../threejs/ObjectManager1";
+import { MainScene } from "../threejs/ObjectManager";
 
 const ThreeCanvas = () => {
   const [scene] = useState(() => MainScene);
