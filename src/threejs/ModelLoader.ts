@@ -69,6 +69,13 @@ export const getAllObjectsWithName = (children: THREE.Object3D[]) => {
     )
 } 
 
+
+const textureLoader = new THREE.TextureLoader();
+
+export const loadTexture = (path: string, onLoader: (texture: THREE.Texture) => void) => {
+    textureLoader.load(path, onLoader)
+}
+
 // const loaderJSON = new THREE.ObjectLoader();
 
 // loaderJSON.load(

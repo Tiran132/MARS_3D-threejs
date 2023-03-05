@@ -1,8 +1,8 @@
 import { createObject, CustomObjectParams, GroupParams, ModelParams, setParamsToObject3D } from "./CustomObject3D";
 import * as THREE from "three"
-import { getAllObjectsWithName, LoadModel, LoadModel_OBJ } from "./ModelLoader";
-import { init, t_RoboHand } from "./tests";
-import { Color } from "three";
+import { getAllObjectsWithName, LoadModel, LoadModel_OBJ, loadTexture } from "./ModelLoader";
+import { init } from "./tests";
+import { Color, Mesh } from "three";
 
 const MainScene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer()
@@ -62,20 +62,44 @@ const create_model_OBJ = (model_name: string) => {
 
 const create_model = async (path: string) => {
     let id: number | undefined
+    let childrenWithName: {
+        name: string;
+        id: number;
+    }[] = []
     await LoadModel(path, (new_object) => {
         MainScene.add(new_object)
         id = new_object.id;
 
-        console.log(getAllObjectsWithName(new_object.children))
+        childrenWithName = getAllObjectsWithName(new_object.children)
         // const zveno2 = getObjectByName("zveno2_detal")
         // if( zveno2) update(zveno2.id, {
         //     color: [100, 50, 12],
         //     // rotation: [50, 0, 0]
         // })
     })
-    return id
+    return {
+        id,
+        children: childrenWithName
+    }
 }
 
+const add_texture = (id: number, path: string) => {
+    const obj = getObjectById(id)
+
+    if (!obj) return;
+
+    let temp = 0;
+    loadTexture(path, (texture) => {
+        if (obj instanceof Mesh) {
+            if (obj.material instanceof THREE.MeshStandardMaterial){
+                obj.material.map = texture;
+                temp = 1;
+            }
+        }
+    })
+
+    return temp == 1;
+}
 
 /**
  *
@@ -114,8 +138,7 @@ const rgroup = (idParent: number, idChild: number) => {
         child.position.set(worldPos.x, worldPos.y, worldPos.z);
     }
 }
-const id1 = create_model("models/model_with_light.json")
-
+// const id1 = create_model("models/model_with_light.json")
 // const torus = create({
 //     object_type: "torus",
 //     position: [1, 5, 0],
@@ -129,7 +152,13 @@ const id1 = create_model("models/model_with_light.json")
 // }
 // ab()
 
+const obj1 = create({
+    object_type: "cube",
+    position: [2, 2, 2]
+})
+add_texture(obj1, "models/grass.jpg")
 
-export { MainScene, getAllObjects, getObjectById, create, update, group, rgroup, create_model }
 
-// init()
+export { MainScene, getAllObjects, getObjectById, create, update, group, rgroup, create_model, create_model_OBJ }
+
+init()

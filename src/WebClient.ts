@@ -1,9 +1,9 @@
 import { CustomObjectParams, GroupParams, ModelParams } from "./threejs/CustomObject3D";
-import { create, create_model, group, rgroup, update } from "./threejs/ObjectManager";
+import { create, create_model, create_model_OBJ, group, rgroup, update } from "./threejs/ObjectManager";
 
 
 interface Command {
-    name: "create" | "update" | "group" | "r_group" | "create_model"
+    name: "create" | "update" | "group" | "r_group" | "create_model" | "create_model_obj"
     data: { id?: number } & CustomObjectParams & GroupParams & ModelParams
 }
 
@@ -18,12 +18,12 @@ const createWebSocket = (port = 5001) => {
     };
 
 
-    MainWS.onmessage = (ev) => {
+    MainWS.onmessage = async (ev) => {
         try {
             const command: Command = JSON.parse(ev.data)
             MainWS?.send(JSON.stringify({
                 name: command.name,
-                id: handleCommand(command)
+                id: await handleCommand(command)
             }))
         } catch {
             return
@@ -33,7 +33,7 @@ const createWebSocket = (port = 5001) => {
     return MainWS
 }
 
-const handleCommand = (command: Command) => {
+const handleCommand = async (command: Command) => {
     switch (command.name) {
         case "create":
             return create(command.data);
@@ -53,7 +53,12 @@ const handleCommand = (command: Command) => {
         case "create_model":
             if (command.data.path != undefined)
                 return create_model(command.data.path);
-            throw "Ids required, but not provided"
+            break
+
+        case "create_model_obj":
+            if (command.data.path != undefined)
+                return create_model_OBJ(command.data.path);
+            break            
     }
 }
 
