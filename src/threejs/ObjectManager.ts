@@ -1,14 +1,23 @@
 import { createObject, CustomObjectParams, GroupParams, ModelParams, setParamsToObject3D } from "./CustomObject3D";
 import * as THREE from "three"
 import { getAllObjectsWithName, LoadModel, LoadModel_OBJ, loadTexture } from "./ModelLoader";
-import { init } from "./tests";
-import { Color, Mesh } from "three";
+import { init, sleep } from "./tests";
+import { Color, Mesh, Scene } from "three";
+import { initial } from "./Raycaster";
 
 const MainScene = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer()
-renderer.setSize(window.innerWidth, window.innerHeight);
+const camera = new THREE.PerspectiveCamera(45)
+// const renderer = new THREE.WebGLRenderer()
+// renderer.setSize(window.innerWidth, window.innerHeight);
 const worldVector = new THREE.Vector3()
+MainScene.add(camera)
 
+const init1 = async () => {
+    await sleep(1000)
+    camera.position.set(0, 10, 20)
+    console.log(MainScene.getObjectByProperty("type", "PerspectiveCamera"))
+}
+init1()
 // new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: new Color(0.5, 0.5, 0.5)})
 // const object = new THREE.Mesh()
 // setParamsToObject3D(object, {
@@ -20,6 +29,9 @@ const worldVector = new THREE.Vector3()
 //     // geometry: [1, 1, 1]
 // }))
 
+
+
+// const cameraObj = MainScene.parent.getObjectByProperty("type", "PerspectiveCamera");
 
 export const a = () => ""
 
@@ -159,6 +171,7 @@ const obj1 = create({
 add_texture(obj1, "models/grass.jpg")
 
 
-export { MainScene, getAllObjects, getObjectById, create, update, group, rgroup, create_model, create_model_OBJ }
+export { MainScene, camera as MainCamera, getAllObjects, getObjectById, create, update, group, rgroup, create_model, create_model_OBJ }
 
 init()
+initial()
