@@ -1,23 +1,21 @@
-import { Vector3, Euler, Color, BufferGeometry, MeshStandardMaterial, Mesh, Material } from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
-import { ObjectType, CommandVector3 } from '../types/types';
-import { CustomObjectParams } from './CustomObject3D';
-import { MainScene } from "./ObjectManager";
 import * as THREE from "three"
-import { sleep } from './tests';
 
 const loader = new OBJLoader();
 const loaderJSON = new THREE.ObjectLoader();
-loader.setPath("/models/robot/");
+// loader.setPath("/models/");
+// loaderJSON.setPath("/models/")
 
-export const LoadModel_OBJ = (name: string, onLoad: (group: THREE.Group) => void) => {
-    loader.load(name, onLoad)
+export const LoadModel_OBJ = (path: string, onLoad: (group: THREE.Group) => void) => {
+    console.log(path)
+    loader.load("http://localhost:8001/" + path, onLoad)
 }
 
 export const LoadModel = async (path: string, onLoad: (group: THREE.Object3D) => void) => {
+    console.log(path)
     return new Promise((resolve, reject) => {
         loaderJSON.load(
-            path,
+            "http://localhost:8001/" + path,
             (obj) => {
                 removeLightFromChildren(obj.children)
                 resolve(onLoad(obj))
@@ -75,65 +73,3 @@ const textureLoader = new THREE.TextureLoader();
 export const loadTexture = (path: string, onLoader: (texture: THREE.Texture) => void) => {
     textureLoader.load(path, onLoader)
 }
-
-// const loaderJSON = new THREE.ObjectLoader();
-
-// loaderJSON.load(
-//     // resource URL
-//     "models/hand_model.json",
-
-//     // onLoad callback
-//     // Here the loaded data is assumed to be an object
-//     function (obj) {
-//         // Add the loaded object to the scene
-//         // if (MainScene)
-//         MainScene.add(obj);
-//         onLoad()
-//     },
-//     (err) => { },
-//     // // onProgress callback
-//     // function ( xhr ) {
-//     // 	console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-//     // },
-
-//     // onError callback
-//     function (err) {
-//         console.error('An error happened');
-//     }
-// );
-
-// export const onLoad1 = async () => {
-//     // console.log(zveno1)
-//     // zveno1?.rotation.set(0, 50, 0);
-    
-//     const zveno1 = MainScene.getObjectByName("zveno1");
-//     const zveno2 = MainScene.getObjectByName("zveno2");
-//     const zveno3 = MainScene.getObjectByName("zveno3");
-//     // zveno2?.rotation.set(50, 0, 0);
-
-    
-
-//     let i = 0;
-
-//     while (true) {
-//         const deg = pingPong( i, -90, 90)
-//         zveno1?.rotation.set(0, THREE.MathUtils.DEG2RAD * deg || 0, 0);
-//         zveno2?.rotation.set(THREE.MathUtils.DEG2RAD * deg * 0.5 || 0, 0, 0);
-//         zveno3?.rotation.set(THREE.MathUtils.DEG2RAD * deg || 0, 0, 0);
-        
-        
-//         await sleep(3) 
-//         i+=0.05;
-//     }
-    
-// }
-
-
-// const pingPong = (current: number, min: number, max: number) => {
-//     const total_steps = max - min
-//     const isIncreases = current % (2*total_steps) < total_steps
-
-//     if (isIncreases) 
-//         return max - (current % total_steps)
-//     return current % total_steps + min
-// }

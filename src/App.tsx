@@ -1,13 +1,14 @@
-import logo from "./logo.svg";
 import "./App.css";
-// import MainCanvas from './components/MainCanvas';
 import ThreeCanvas from "./components/ThreeCanvas";
-import { createWebSocket } from "./WebClient";
-import { useState } from "react";
+import { initSockets } from "./WebClient";
+import { useEffect, useState } from "react";
 
 function App() {
-  const [server] = useState(() => createWebSocket());
-  const [box, setBox] = useState(true);
+  useEffect(() => {
+    initSockets();
+  }, []);
+
+  const [box, setBox] = useState(false);
   const [state, setState] = useState(1);
 
   return (

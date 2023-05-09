@@ -2,14 +2,6 @@ import { Vector3, Euler, Color } from "three";
 import { CommandColor, CommandVector3, CustomElementTypes, ObjectType } from "../types/types"
 import * as THREE from "three";
 
-interface CustomObjectTypes {
-    object_type: ObjectType
-    position: Vector3
-    rotation: Euler
-    geometry: CommandVector3
-    scale: Vector3
-    color: Color
-}
 
 export interface CustomObjectParams {
     object_type?: ObjectType
@@ -22,6 +14,10 @@ export interface CustomObjectParams {
 
 export interface ModelParams {
     path?: string
+}
+
+export interface UpdateByNameParams {
+    name?: string
 }
 
 export interface GroupParams {

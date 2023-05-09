@@ -499,11 +499,81 @@ export const sleep = (ms: number) => {
 // }
 
 
+
 export const init = () => {
-    create_model("models/textured_model.json")
+    // create_model("models/textured_model.json")
     
     // t_obj_hand()
     // t_robot_alina()
+
+
+
+
+
+
+    
+let arr = []
+
+const index = 1
+for (let i = 0; i < 200; i++) {
+  let rotations = [i / 5 , 0, 0]
+  arr.push({
+       "name":"update_by_name",
+       "data":{
+          "id":null,
+          "object_type": null,
+          "path":null,
+          "position":null,
+          "rotation":rotations,
+          "scale":null,
+          "color":null,
+          "geometry":null,
+          "object_id":null,
+          "name": "zveno2"
+       }
+    }) 
+}
+
+for (let i = 0; i > -200; i--) {
+    let rotations = [i / 5 , 0, 0]
+    arr.push({
+         "name":"update_by_name",
+         "data":{
+            "id":null,
+            "object_type": null,
+            "path":null,
+            "position":null,
+            "rotation":rotations,
+            "scale":null,
+            "color":null,
+            "geometry":null,
+            "object_id":null,
+            "name": "zveno3"
+         }
+      }) 
+  }
+  for (let i = 0; i < 450; i++) {
+    let rotations = [0, 0, 0]
+    rotations[1] = i / 5  
+    arr.push({
+         "name":"update_by_name",
+         "data":{
+            "id":null,
+            "object_type": null,
+            "path":null,
+            "position":null,
+            "rotation":rotations,
+            "scale":null,
+            "color":null,
+            "geometry":null,
+            "object_id":null,
+            "name": "zveno1"
+         }
+      }) 
+  }
+  
+
+console.log(arr)
 }
 
 

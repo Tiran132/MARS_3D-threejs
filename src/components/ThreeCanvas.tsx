@@ -1,7 +1,6 @@
 import { OrbitControls, Stats } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
-import { PerspectiveCamera } from "three";
 import { MainCamera, MainScene } from "../threejs/ObjectManager";
 
 const ThreeCanvas = () => {
@@ -14,7 +13,6 @@ const ThreeCanvas = () => {
       style={{ width: `100%`, height: `100vh` }}
       shadows
       camera={camera}
-    //   camera={{ position: [0, 10, 20], fov: 45 }}
     >
       <primitive object={scene} />
       <OrbitControls />

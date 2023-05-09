@@ -1,4 +1,4 @@
-import { createObject, CustomObjectParams, GroupParams, ModelParams, setParamsToObject3D } from "./CustomObject3D";
+import { createObject, CustomObjectParams, setParamsToObject3D } from "./CustomObject3D";
 import * as THREE from "three"
 import { getAllObjectsWithName, LoadModel, LoadModel_OBJ, loadTexture } from "./ModelLoader";
 import { init, sleep } from "./tests";
@@ -7,8 +7,6 @@ import { initial } from "./Raycaster";
 
 const MainScene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45)
-// const renderer = new THREE.WebGLRenderer()
-// renderer.setSize(window.innerWidth, window.innerHeight);
 const worldVector = new THREE.Vector3()
 MainScene.add(camera)
 
@@ -18,20 +16,6 @@ const init1 = async () => {
     console.log(MainScene.getObjectByProperty("type", "PerspectiveCamera"))
 }
 init1()
-// new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: new Color(0.5, 0.5, 0.5)})
-// const object = new THREE.Mesh()
-// setParamsToObject3D(object, {
-//     object_type: "sphere",
-
-// })
-// console.log(createObject({
-//     object_type: "cube",
-//     // geometry: [1, 1, 1]
-// }))
-
-
-
-// const cameraObj = MainScene.parent.getObjectByProperty("type", "PerspectiveCamera");
 
 export const a = () => ""
 
@@ -56,6 +40,7 @@ const create = (params: CustomObjectParams) => {
 }
 
 const create_model_OBJ = (model_name: string) => {
+    console.log("create_model", model_name)
     let id: number | undefined
     LoadModel_OBJ(model_name, (new_object) => {
         if (new_object) {
@@ -78,21 +63,14 @@ const create_model = async (path: string) => {
         name: string;
         id: number;
     }[] = []
+    console.log("create_model", path)
     await LoadModel(path, (new_object) => {
         MainScene.add(new_object)
         id = new_object.id;
 
         childrenWithName = getAllObjectsWithName(new_object.children)
-        // const zveno2 = getObjectByName("zveno2_detal")
-        // if( zveno2) update(zveno2.id, {
-        //     color: [100, 50, 12],
-        //     // rotation: [50, 0, 0]
-        // })
     })
-    return {
-        id,
-        children: childrenWithName
-    }
+    return id
 }
 
 const add_texture = (id: number, path: string) => {
@@ -127,6 +105,17 @@ const update = (id: number, params: CustomObjectParams) => {
     return object?.id
 }
 
+const updateByName = (name: string, params: CustomObjectParams) => {
+    const object = getObjectByName(name)
+
+    if (object) {
+        setParamsToObject3D(object, params)
+    }
+
+    return object?.id
+}
+
+
 const group = (idParent: number, idChild: number) => {
     const parent = getObjectById(idParent)
     const child = getObjectById(idChild)
@@ -147,31 +136,23 @@ const rgroup = (idParent: number, idChild: number) => {
     if (parent && child) {
         const worldPos = child.getWorldPosition(worldVector);
         MainScene.add(child)
+        parent.remove(child)
         child.position.set(worldPos.x, worldPos.y, worldPos.z);
     }
 }
-// const id1 = create_model("models/model_with_light.json")
-// const torus = create({
-//     object_type: "torus",
-//     position: [1, 5, 0],
-//     geometry: [1, 0.5, 1]
-// })
 
-// const ab = () => {
-//     return id1.then((value) => {
-//         console.log(value)
-//     })
-// }
-// ab()
+const robj = (id: number) => {
+    const obj = getObjectById(id)
 
-const obj1 = create({
-    object_type: "cube",
-    position: [2, 2, 2]
-})
-add_texture(obj1, "models/grass.jpg")
+    if (obj) {
+        MainScene.remove(obj)
+        return id
+    }
+    
+    return
+}
 
-
-export { MainScene, camera as MainCamera, getAllObjects, getObjectById, create, update, group, rgroup, create_model, create_model_OBJ }
+export { MainScene, camera as MainCamera, add_texture, getAllObjects, getObjectById, create, update, updateByName, group, rgroup, create_model, create_model_OBJ }
 
 init()
 initial()
