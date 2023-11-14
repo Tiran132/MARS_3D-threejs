@@ -1,9 +1,9 @@
 import { createObject, CustomObjectParams, setParamsToObject3D } from "./CustomObject3D";
 import * as THREE from "three"
 import { getAllObjectsWithName, LoadModel, LoadModel_OBJ, loadTexture } from "./ModelLoader";
-import { init, sleep } from "./tests";
 import { Color, Mesh, Scene } from "three";
 import { initial } from "./Raycaster";
+import { sleep } from "../utils";
 
 const MainScene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45)
@@ -172,6 +172,3 @@ const robj = (id: number) => {
 }
 
 export { MainScene, camera as MainCamera, get_model_names, add_texture, getAllObjects, getObjectById, create, update, updateByName, group, rgroup, create_model, create_model_OBJ }
-
-init()
-initial()

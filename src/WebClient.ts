@@ -1,7 +1,7 @@
 import { WS_PORT } from "./config";
 import { CustomObjectParams, GroupParams, ModelParams, UpdateByNameParams } from "./threejs/CustomObject3D";
 import { add_texture, create, create_model, create_model_OBJ, get_model_names, group, rgroup, update, updateByName } from "./threejs/ObjectManager";
-import { sleep } from "./threejs/tests";
+import { sleep } from "./utils";
 
 
 interface Command {
@@ -150,14 +150,6 @@ const handleCommand = async (command: Command) => {
             break
     }
 }
-
-// const loop = async () => {
-//     while (true) {
-//         if (comands.length)
-//             console.log(comands.shift())
-//         await sleep(1000 / 60)
-//     }
-// }
 
 const reconectLoop = async (port: number, sec = 1) => {
     while (true) {
