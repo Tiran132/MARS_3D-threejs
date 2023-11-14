@@ -67,10 +67,24 @@ const create_model = async (path: string) => {
     await LoadModel(path, (new_object) => {
         MainScene.add(new_object)
         id = new_object.id;
-
+        
         childrenWithName = getAllObjectsWithName(new_object.children)
     })
     return id
+}
+
+const get_model_names = async (id: number) => {
+    let childrenWithName: {
+        name: string;
+        id: number;
+    }[] = []
+    const obj = getObjectById(id);
+
+    if (!obj) return;
+
+    childrenWithName = getAllObjectsWithName(obj.children)
+
+    return childrenWithName
 }
 
 const add_texture = (id: number, path: string) => {
@@ -125,7 +139,10 @@ const group = (idParent: number, idChild: number) => {
         const localePos = parent.worldToLocal(worldPos);
         parent.add(child)
         child.position.set(localePos.x, localePos.y, localePos.z);
+        
+        return true
     }
+
 }
 
 
@@ -138,6 +155,8 @@ const rgroup = (idParent: number, idChild: number) => {
         MainScene.add(child)
         parent.remove(child)
         child.position.set(worldPos.x, worldPos.y, worldPos.z);
+        
+        return true
     }
 }
 
@@ -152,7 +171,7 @@ const robj = (id: number) => {
     return
 }
 
-export { MainScene, camera as MainCamera, add_texture, getAllObjects, getObjectById, create, update, updateByName, group, rgroup, create_model, create_model_OBJ }
+export { MainScene, camera as MainCamera, get_model_names, add_texture, getAllObjects, getObjectById, create, update, updateByName, group, rgroup, create_model, create_model_OBJ }
 
 init()
 initial()

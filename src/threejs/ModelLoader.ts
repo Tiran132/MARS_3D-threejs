@@ -1,21 +1,20 @@
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import * as THREE from "three"
+import { FTP_PORT } from '../config';
 
 const loader = new OBJLoader();
 const loaderJSON = new THREE.ObjectLoader();
-// loader.setPath("/models/");
-// loaderJSON.setPath("/models/")
 
 export const LoadModel_OBJ = (path: string, onLoad: (group: THREE.Group) => void) => {
     console.log(path)
-    loader.load("http://localhost:8001/" + path, onLoad)
+    loader.load(`http://localhost:${FTP_PORT}/` + path, onLoad)
 }
 
 export const LoadModel = async (path: string, onLoad: (group: THREE.Object3D) => void) => {
     console.log(path)
     return new Promise((resolve, reject) => {
         loaderJSON.load(
-            "http://localhost:8001/" + path,
+            `http://localhost:${FTP_PORT}/` + path,
             (obj) => {
                 removeLightFromChildren(obj.children)
                 resolve(onLoad(obj))

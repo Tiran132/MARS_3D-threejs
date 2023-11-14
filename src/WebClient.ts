@@ -1,10 +1,11 @@
+import { WS_PORT } from "./config";
 import { CustomObjectParams, GroupParams, ModelParams, UpdateByNameParams } from "./threejs/CustomObject3D";
-import { add_texture, create, create_model, create_model_OBJ, group, rgroup, update, updateByName } from "./threejs/ObjectManager";
+import { add_texture, create, create_model, create_model_OBJ, get_model_names, group, rgroup, update, updateByName } from "./threejs/ObjectManager";
 import { sleep } from "./threejs/tests";
 
 
 interface Command {
-    name: "create" | "update" | "group" | "r_group" | "create_model" | "create_model_obj" | "add_texture" | "update_by_name"
+    name: "create" | "update" | "group" | "r_group" | "create_model" | "create_model_obj" | "add_texture" | "update_by_name" | "get_model_names" | "get_position"
     data: { id?: number } & CustomObjectParams & GroupParams & ModelParams & UpdateByNameParams
 }
 
@@ -44,12 +45,20 @@ const createWebSocket = (port = 5001) => {
         }
         
         let commandRes;
-        // try {
+        let id: number | null = null
+        let names: any | null = null
+        
+        try {
             console.log(command)
             commandRes = await handleCommand(command);
-        // } catch {
-        //     commandRes = undefined;
-        // }
+            
+            if (typeof commandRes == "number")
+                id = commandRes
+            else if (typeof commandRes != "number" && typeof commandRes != "boolean")
+                names = commandRes
+        } catch {
+            commandRes = undefined;
+        }
 
         try {
             
@@ -58,7 +67,8 @@ const createWebSocket = (port = 5001) => {
                 isResult: true,
                 data: JSON.stringify({
                     name: command.name,
-                    id: commandRes,
+                    id: command.data.id || id,
+                    data: { id, names },
                     isSuccess: commandRes != undefined,
                 })
             }
@@ -133,6 +143,11 @@ const handleCommand = async (command: Command) => {
             if (command.data.id != undefined && command.data.path != undefined)
                 return add_texture(command.data.id, command.data.path);
             break
+
+        case "get_model_names":
+            if (command.data.id != undefined)
+                return get_model_names(command.data.id);
+            break
     }
 }
 
@@ -156,7 +171,7 @@ const reconectLoop = async (port: number, sec = 1) => {
     }
 }
 export const initSockets = () => {
-    reconectLoop(5001, 2)
+    reconectLoop(WS_PORT, 2)
 
     console.log("INITIALIZED SOCKETS!")
 }
